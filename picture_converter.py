@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 from PIL import Image
 
-#Проверяем есть ли в папке jpg-файлы
+# Проверяем есть ли в папке jpg-файлы
 def check_folder(folder_path):
     # Получение списка файлов в папке
     files = os.listdir(folder_path)
