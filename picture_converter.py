@@ -4,16 +4,19 @@ from datetime import datetime
 from PIL import Image
 
 # Проверяем есть ли в папке jpg-файлы
-def check_folder(folder_path):
+def get_jpg_files(folder_path):
     # Получение списка файлов в папке
     files = os.listdir(folder_path)
+    formats = ('jpg', 'jpeg', 'JPG')
 
     # Фильтрация файлов по формату JPG
-    jpg_files = [f for f in files if f.lower().endswith('.jpg')]
+    jpg_files = [f for f in files if f.endswith(formats)]
 
     return jpg_files
 
-
+# Проверяем размер изображения.
+# Если размер бОльшей из сторон превышает 150, то меняем размер этой стороны на 150.
+# При этом размер изображения должен уменьшится прапорционально.
 def correct_size(image):
 
     # Получение информации об изображении
@@ -37,7 +40,8 @@ def correct_size(image):
 
     return orientation
 
-
+# Изменить размер изображения на (512Х512)
+# Создать белый квадрат 512Х512 и поместить изображение в центр квадрата
 def change_size(width, height):
     # Создание белого квадрата 512x512
     new_image = Image.new("RGB", (512, 512), (255, 255, 255))
@@ -57,19 +61,25 @@ def get_next_file_number(folder_path):
     files = os.listdir(folder_path)
     numbers = [int(os.path.splitext(f)[0]) for f in files]
     print(numbers)
-    return max(numbers) + 1
+    return str(max(numbers) + 1)
 
 
 
 if __name__ == "__main__":
+    # директория, в которой хранятся .jpg-файлы
+    source_directory = 'upload'
+
+    # директория с .png-файлами
+    target_directory = 'ready'
 
     while True:
-
-        files_list = check_folder('upload')
+        # получаем список jpg-файлов
+        files_list = get_jpg_files(source_directory)
         if files_list:
-            for i in range(len(files_list)):
+            for i in files_list:
                 # Открытие изображения
-                with Image.open(f'upload\{files_list[i]}') as image:
+                file_path = os.path.join(source_directory, i)
+                with Image.open(os.path.abspath(file_path)) as image:
 
                     # Корректируем пропорции изображения, если нужно
                     orientation = correct_size(image)
@@ -78,14 +88,15 @@ if __name__ == "__main__":
                     new_image = change_size(*image.size)
 
                 # Генерируем имя файла и сохраняем новое изображение
-                new_name = get_next_file_number('ready')
-                new_image.save(f'ready\{new_name}.png')
-                print(f'[{datetime.now()}] Изображение {files_list[i]}, ориентация: {orientation}, обработано и сохранено в {new_name}.png')
+                new_name = get_next_file_number(target_directory)
+                new_path = os.path.join(target_directory, new_name)
+                new_image.save(f'{os.path.abspath(new_path)}.png')
+                print(f'[{datetime.now()}] Изображение {i}, ориентация: {orientation}, обработано и сохранено в {new_name}.png')
 
                 # Удаляем изображение в исходной папке
-                os.remove(f'upload\{files_list[i]}')
+                os.remove(file_path)
         else:
             time.sleep(5)
 
 
-        #break
+        break
