@@ -70,7 +70,10 @@ def get_next_file_number(folder_path):
         except ValueError:
             continue
 
-    return str(max(numbers) + 1)
+    try:
+        return str(max(numbers) + 1)
+    except ValueError:
+        return '0'
 
 
 if __name__ == "__main__":
